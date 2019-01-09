@@ -8,5 +8,15 @@
 - 示例
 
 ```go
+package main
+
+import (
+	"fmt"
+	"github.com/MrNullPoint/NatCheck"
+)
+
+func main()  {
+	fmt.Println(stun.RunCheck(""))
+}
 
 ```
