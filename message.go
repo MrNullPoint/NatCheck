@@ -1,7 +1,6 @@
-package stun
+package main
 
 import (
-	"NatCheck/utils"
 	"math/rand"
 	"net"
 	"strconv"
@@ -72,7 +71,7 @@ func (m *Message) FromBytes(b []byte) {
 	m.Header.Length = b[2:4]
 	m.Header.TransactionId = b[4:20]
 
-	length := utils.BytesToUint16(m.Header.Length)
+	length := BytesToUint16(m.Header.Length)
 	if length > 0 {
 		var attrs []Attribute
 		start := 20
@@ -81,7 +80,7 @@ func (m *Message) FromBytes(b []byte) {
 				var attr Attribute
 				attr.Type = b[start : start+2]
 				attr.Length = b[start+2 : start+4]
-				attr.Value = b[start+4 : start+4+int(utils.BytesToUint16(attr.Length))]
+				attr.Value = b[start+4 : start+4+int(BytesToUint16(attr.Length))]
 				attrs = append(attrs, attr)
 				start = start + int(attr.Len())
 			} else {
@@ -103,7 +102,7 @@ func (m *Message) Len() uint16 {
 func (m *Message) GetMappedAddress() *Address {
 	var address Address
 	for _, attr := range m.Attributes {
-		if utils.BytesToUint16(attr.Type) == AttributeType["MAPPED_ADDRESS"] {
+		if BytesToUint16(attr.Type) == AttributeType["MAPPED_ADDRESS"] {
 			address.FromBytes(attr.Value)
 			return &address
 		}
@@ -114,7 +113,7 @@ func (m *Message) GetMappedAddress() *Address {
 func (m *Message) GetChangedAddress() *Address {
 	var address Address
 	for _, attr := range m.Attributes {
-		if utils.BytesToUint16(attr.Type) == AttributeType["CHANGED_ADDRESS"] {
+		if BytesToUint16(attr.Type) == AttributeType["CHANGED_ADDRESS"] {
 			address.FromBytes(attr.Value)
 		}
 	}
@@ -154,13 +153,13 @@ func (a *Address) String() string {
 		ip = (net.IP)(a.Ip).String()
 	}
 	if len(a.Port) == 2 {
-		port = strconv.Itoa(int(utils.BytesToUint16(a.Port)))
+		port = strconv.Itoa(int(BytesToUint16(a.Port)))
 	}
 	return ip + ":" + port
 }
 
-func RandTransactionId() utils.Uint128 {
-	var ret utils.Uint128
+func RandTransactionId() Uint128 {
+	var ret Uint128
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 	ret[0] = rnd.Uint64()
@@ -170,9 +169,9 @@ func RandTransactionId() utils.Uint128 {
 
 func NewBindRequest() *Message {
 	var message Message
-	message.Header.Type = utils.Uint16ToBytes(HeaderType["BIND_REQUEST"])
-	message.Header.TransactionId = utils.Uint128ToBytes(RandTransactionId())
-	message.Header.Length = utils.Uint16ToBytes(message.Len())
+	message.Header.Type = Uint16ToBytes(HeaderType["BIND_REQUEST"])
+	message.Header.TransactionId = Uint128ToBytes(RandTransactionId())
+	message.Header.Length = Uint16ToBytes(message.Len())
 	return &message
 }
 
@@ -188,15 +187,15 @@ func NewChangeRequest(isChangeIp bool, isChangePort bool) *Message {
 	}
 
 	var attr Attribute
-	attr.Type = utils.Uint16ToBytes(AttributeType["CHANGE_REQUEST"])
-	attr.Value = utils.Uint32ToBytes(value)
-	attr.Length = utils.Uint16ToBytes(uint16(len(attr.Value)))
+	attr.Type = Uint16ToBytes(AttributeType["CHANGE_REQUEST"])
+	attr.Value = Uint32ToBytes(value)
+	attr.Length = Uint16ToBytes(uint16(len(attr.Value)))
 
 	var message Message
 	message.Attributes = append(message.Attributes, attr)
-	message.Header.Type = utils.Uint16ToBytes(HeaderType["BIND_REQUEST"])
-	message.Header.TransactionId = utils.Uint128ToBytes(RandTransactionId())
-	message.Header.Length = utils.Uint16ToBytes(attr.Len())
+	message.Header.Type = Uint16ToBytes(HeaderType["BIND_REQUEST"])
+	message.Header.TransactionId = Uint128ToBytes(RandTransactionId())
+	message.Header.Length = Uint16ToBytes(attr.Len())
 
 	return &message
 }

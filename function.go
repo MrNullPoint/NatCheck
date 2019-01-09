@@ -1,7 +1,6 @@
-package stun
+package main
 
 import (
-	"NatCheck/utils"
 	"errors"
 	"fmt"
 	"net"
@@ -143,7 +142,7 @@ func RunCheck(ip string) string {
 		return NatType["FULL_CONE"]
 	}
 
-	conn2 := connect((net.IP)(caddr.Ip).String(), int(utils.BytesToUint16(caddr.Port)))
+	conn2 := connect((net.IP)(caddr.Ip).String(), int(BytesToUint16(caddr.Port)))
 
 	resp = TestI(conn2)
 	if resp.Len() == 0 {
